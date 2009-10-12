@@ -1,3 +1,4 @@
+import os
 from jinja2 import Template
 from markdown import markdown
 
@@ -26,20 +27,17 @@ class Page:
         replacement values
         """
         self.inserts = self.docinfo
+
         self.inserts['page'] = {}
-        self.inserts['page']['title'] = self.docinfo['title']
-        print self.docinfo['title']
+        for key, value in self.docinfo.iteritems():
+            self.inserts['page'][key] = value
+
         self.inserts['content'] = markdown(self.inserts['content'])
 
-    def fetch_insert(self, hook):
-        """
-        Fetch the replacement for a particular hook
-        """
-        pass
-
     def fileout(self):
+        filecore = os.path.splitext(self.docinfo['filename'])[0]
         try:
             date = self.inserts['date'].replace('-','/')
         except:
             date = ''
-        return date + self.docinfo['filename'] + '.html'
+        return date + filecore + '.html'

@@ -28,41 +28,42 @@ class cyblog:
                     os.mkdir(current_outdir)
                 except:
                     pass
+                
                 for filename in files:
-                    modify_time = os.path.getmtime(root +'/'+filename.lstrip('.'))
-                    print modify_time, self.timestamp
+                    filepath = root +'/'+filename.lstrip('.')
+                    modify_time = os.path.getmtime(filepath)
+
                     if modify_time  > self.timestamp and filename[-1] != '~':
                         if filename.endswith('.markdown') or filename.endswith('.mkdwn'):
-                            
-                            infile = root+'/'+filename
 
-                            html, html_file = self.htmlgen(infile)
+                            html, html_file = self.htmlgen(filepath)
                             html_file = open(self.outdir + '/'+ html_file, 'w')
                             html_file.write(html)
                             
                             html_file.close()
                         else:
-                            print root+filename
-                            shutil.copy(root+'/'+filename.lstrip('.'), current_outdir+filename)
+                            shutil.copy(filepath, current_outdir+filename)
 
     def htmlgen(self, indoc):
         """
         creates the html version of the markdown/yaml input
         """
         doc =  open(indoc).read().split('---\n')
+        
         meta = doc[1]
-        mdwn = doc[2]
+        content = doc[2]
+        
         docinfo = yaml.load(meta)
         docinfo['filename'] = indoc
-        docinfo['content'] = mdwn
+        docinfo['content'] = content
 
         if 'layout' in docinfo:
             layout_file = docinfo['layout']
         else:
             layout_file = config.default_layout
+            
         layout = open(self.layoutdir + '/' + layout_file + '.html')
         page = Page(layout, docinfo)
-        print page.fileout()
         
         return (page.generate(), page.fileout())
 
