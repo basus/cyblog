@@ -1,4 +1,5 @@
-import os, yaml, shutil, pickle, time
+import os, yaml, shutil, pickle, time, sys
+from page import Page
 
 # for root, dir, files in os.walk('.'):
 #     if not root == '.git':
@@ -6,10 +7,11 @@ import os, yaml, shutil, pickle, time
 #             print filename
 #         print "DONE"
 
-class mitosis:
+class cyblog:
 
     def __init__(self):
-        self.output = 'mitosis'
+        self.output = 'cyblog'
+        self.layoutdir = '_layouts'
         self.outdir = os.getcwd() + '/' + self.output
         try:
             tsfile = open('timestamp')
@@ -21,7 +23,6 @@ class mitosis:
     def process(self):
         for root, dir, files in os.walk('.'):
             if root.find('/.') == -1 and root.find('./'+self.output) == -1:
-                print '\n'
                 current_outdir = self.outdir + root[1:] + '/'
                 try:
                     os.mkdir(current_outdir)
@@ -32,13 +33,43 @@ class mitosis:
                     print modify_time, self.timestamp
                     if modify_time  > self.timestamp and filename[-1] != '~':
                         if filename.endswith('.markdown') or filename.endswith('.mkdwn'):
-                            fl = open(current_outdir + filename, 'w')
-                            fl.close()
+                            
+                            infile = root+'/'+filename
+
+                            html, html_file = self.htmlgen(infile)
+                            html_file = open(self.outdir + '/'+ html_file, 'w')
+                            html_file.write(html)
+                            
+                            html_file.close()
                         else:
                             print root+filename
                             shutil.copy(root+'/'+filename.lstrip('.'), current_outdir+filename)
 
-converter = mitosis()
+    def htmlgen(self, indoc):
+        """
+        creates the html version of the markdown/yaml input
+        """
+        doc =  open(indoc).read().split('---\n')
+        meta = doc[1]
+        mdwn = doc[2]
+        docinfo = yaml.load(meta)
+        docinfo['filename'] = indoc
+        docinfo['content'] = mdwn
+
+        if 'layout' in docinfo:
+            layout_file = docinfo['layout']
+        else:
+            layout_file = config.default_layout
+        layout = open(self.layoutdir + '/' + layout_file + '.html')
+        page = Page(layout, docinfo)
+        print page.fileout()
+        
+        return (page.generate(), page.fileout())
+
+sys.path.append('.')
+import config
+
+converter = cyblog()
 converter.process()
 
 tsfile = open('timestamp', 'w')
