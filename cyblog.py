@@ -1,17 +1,11 @@
 import os, yaml, shutil, pickle, time, sys
 from page import Page
 
-# for root, dir, files in os.walk('.'):
-#     if not root == '.git':
-#         for filename in dir:
-#             print filename
-#         print "DONE"
-
 class cyblog:
 
     def __init__(self):
-        self.output = 'cyblog'
-        self.layoutdir = '_layouts'
+        self.output = config.output
+        self.layoutdir = config.layoutdir
         self.outdir = os.getcwd() + '/' + self.output
         try:
             tsfile = open('timestamp')
@@ -22,7 +16,7 @@ class cyblog:
 
     def process(self):
         for root, dir, files in os.walk('.'):
-            if root.find('/.') == -1 and root.find('./'+self.output) == -1:
+            if root.find('/.') == -1 and root.find('./'+self.output) == -1 and root[0] == '_':
                 current_outdir = self.outdir + root[1:] + '/'
                 try:
                     os.mkdir(current_outdir)
@@ -41,7 +35,7 @@ class cyblog:
                             html_file.write(html)
                             
                             html_file.close()
-                        else:
+                        elif filename[1] != '_':
                             shutil.copy(filepath, current_outdir+filename)
 
     def htmlgen(self, indoc):
@@ -51,7 +45,7 @@ class cyblog:
         doc =  open(indoc).read().split('---\n')
         
         meta = doc[1]
-        content = doc[2]
+        content = '---\n'.join(doc[2:])
         
         docinfo = yaml.load(meta)
         docinfo['filename'] = indoc
@@ -73,6 +67,6 @@ import config
 converter = cyblog()
 converter.process()
 
-tsfile = open('timestamp', 'w')
-pickle.dump(time.time()+10, tsfile)
+tsfile = open(config.timestamp, 'w')
+pickle.dump(time.time(), tsfile)
 tsfile.close()
