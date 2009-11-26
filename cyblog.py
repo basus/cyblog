@@ -16,7 +16,7 @@ class cyblog:
 
     def process(self):
         for root, dir, files in os.walk('.'):
-            if root.find('/.') == -1 and root.find('./'+self.output) == -1 and root[0] == '_':
+            if root.find('/.') == -1 and root.find('./'+self.output) == -1 and root[0] != '_':
                 current_outdir = self.outdir + root[1:] + '/'
                 try:
                     os.mkdir(current_outdir)
