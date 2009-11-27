@@ -16,7 +16,6 @@ class Page:
         self.extract_yaml()
         self.template = Template(self.layout.read())
         self.output_path = os.path.splitext(filename)[0] + '.html'
-        print self.output_path
         
     def extract_yaml(self):
         """

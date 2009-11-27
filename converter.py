@@ -59,7 +59,10 @@ class Converter:
         post = Post(filepath, self.layoutdir)
         html = post.generate()
         htmlpath = post.output_path
-        os.makedirs(self.outdir + '/' + post.prefix)
+        try:
+            os.makedirs(self.outdir + '/' + post.prefix)
+        except:
+            pass
         self.write_out(html, htmlpath)
 
     def make_page(self, filepath):
@@ -73,45 +76,3 @@ class Converter:
         htmlfile = open(htmlpath, 'w')
         htmlfile.write(html)
         htmlfile.close()
-        
-
-    def process_files(self, root, files):
-        for filename in files:
-            filepath = root +'/'+filename
-            modify_time = os.path.getmtime(filepath)
-
-            if modify_time  > self.timestamp and filename[-1] != '~' and filename[0] != '.':
-                if filename.endswith(constants.formats):
-
-                    html, html_file = self.htmlgen(filepath)
-                    html_filepath = self.outdir + '/' + html_file
-
-                    html_file = open(html_filepath, 'w')
-                    html_file.write(html)
-
-                    html_file.close()
-                elif filename[1] != '_':
-                    shutil.copy(filepath, self.current_outdir+filename)
-
-    def htmlgen(self, indoc):
-        """
-        Creates the HTML version of the markdown/yaml input
-        """
-        doc =  open(indoc).read().split('---\n')
-        
-        meta = doc[1]
-        content = '---\n'.join(doc[2:])
-        
-        docinfo = yaml.load(meta)
-        docinfo['filename'] = indoc
-        docinfo['content'] = content
-
-        if 'layout' in docinfo:
-            layout_file = docinfo['layout']
-        else:
-            layout_file = self.default_layout
-            
-        layout = open(self.layoutdir + '/' + layout_file + '.html')
-        page = Page(layout, docinfo)
-        
-        return (page.generate(), page.fileout())
