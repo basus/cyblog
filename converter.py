@@ -1,4 +1,4 @@
-import os,yaml,shutil
+import os,shutil
 import constants
 from page import Page
 from page import Post
@@ -9,14 +9,14 @@ class Converter:
         """
         Initializes instance with configuration details
         """
-        self.output = config.output
-        self.layoutdir = config.layoutdir
-        self.default = config.default_layout
+        self.output = config['output']
+        self.layoutdir = config['layoutdir']
+        self.default = config['default_layout']
         self.outdir = os.getcwd() + '/' + self.output
-        self.blogdir = config.blog
+        self.blogdir = config['blog']
         
         try:
-            tsfile = open(config.timestamp)
+            tsfile = open(config['timestamp'])
             self.timestamp = pickle.load(tsfile)
             tsfile.close()
         except:
