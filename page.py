@@ -28,6 +28,7 @@ class Page:
         self.info = yaml.load(meta)
         self.info['filename'] = self.filename
         self.info['page'] = {}
+        self.info['content'] = markdown(self.content)
 
         for key, value in self.info.iteritems():
             self.info['page'][key] = value
