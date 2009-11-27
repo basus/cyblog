@@ -1,6 +1,7 @@
 import os,yaml,shutil
 import constants
 from page import Page
+from page import Post
 
 class Converter:
 
@@ -26,38 +27,49 @@ class Converter:
         Walks through the filesystem and converts all appropriate files to HTML
         """
         for root, dir, files in os.walk('.'):
-            if root.find('/.') == -1 and root.find('./'+self.output) == -1 and root[0] != '_':
+            if root.find('/.') == -1 and root.find('./'+self.output) == -1:
                 self.current_outdir = self.outdir + root[1:] + '/'
+                try:
+                    os.mkdir(self.current_outdir)
+                except:
+                        pass
                 
                 for filename in files:
                     filepath = root +'/'+filename
                     modify_time = os.path.getmtime(filepath)
-
-                    if modify_time  > self.timestamp and self.convertable(filename):
-                        if root[2:] == self.blogdir:
-                            make_post(filepath)
-                        else:
-                            try:
-                                os.mkdir(self.current_outdir)
-                            except:
-                                pass
+                        
+                    if modify_time  > self.timestamp:
+                        if root[2:] == self.blogdir and self.convertable(filename):
+                            self.make_post(filepath)
+                        elif self.convertable(filename):
                             self.make_page(filepath)
+                        elif self.copyable(filename):
                             shutil.copy(filepath, self.current_outdir+filename)
 
     def convertable(self, filename):
         """
         Checks if the given filename can be converted to HTML
         """
-        return filename[-1] != '~' and filename[0] != '.' and filename[0] != '_' and filename.endswith(constants.formats)
+        return filename.endswith(constants.formats) and self.copyable(filename)
 
-    def make_post(self, filename):
-        pass
+    def copyable(self, filename):
+        return filename[-1] != '~' and filename[0] != '.' and filename[0] != '_'
 
-    def make_page(self, filename):
-        page = Page(open(filename).read(), filename, self.layoutdir)
+    def make_post(self, filepath):
+        post = Post(filepath, self.layoutdir)
+        html = post.generate()
+        htmlpath = post.output_path
+        os.makedirs(self.outdir + '/' + post.prefix)
+        self.write_out(html, htmlpath)
+
+    def make_page(self, filepath):
+        page = Page(filepath, self.layoutdir)
         html = page.generate()
-        htmlpath = self.outdir + page.output_file
+        htmlpath = page.output_path
+        self.write_out(html, htmlpath)
 
+    def write_out(self, html, outpath):
+        htmlpath = self.outdir + outpath.lstrip('.')
         htmlfile = open(htmlpath, 'w')
         htmlfile.write(html)
         htmlfile.close()

@@ -8,14 +8,15 @@ class Page:
     fills for the the hooks in the layout
     """
 
-    def __init__(self, filedata, filename, layoutdir, def_layout='default'):
-        self.data = filedata
+    def __init__(self, filename, layoutdir, def_layout='default'):
+        self.data = open(filename).read()
         self.filename = filename
         self.layoutdir = layoutdir
         self.default_layout = def_layout
         self.extract_yaml()
         self.template = Template(self.layout.read())
-        self.output_file = os.path.splitext(filename)[0].lstrip('.') + '.html'
+        self.output_path = os.path.splitext(filename)[0] + '.html'
+        print self.output_path
         
     def extract_yaml(self):
         """
@@ -44,3 +45,21 @@ class Page:
         Fills in the layout with appropriate data for the hooks
         """
         return self.template.render(self.info)
+
+
+class Post:
+
+    def __init__(self, filepath,layoutdir):
+        filename = filepath.split('/')[-1]
+        expandedname = filename.split('-',3)
+        self.date = expandedname[:3]
+        self.title = '-'.join(expandedname[3:]).split('.')[0]
+        self.page = Page(filepath, layoutdir)
+        self.make_output_path()
+
+    def generate(self):
+        return self.page.generate()
+
+    def make_output_path(self):
+        self.prefix = '/'.join(self.date)
+        self.output_path = './' + self.prefix + '/' + self.title + '.html'
