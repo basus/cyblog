@@ -1,4 +1,5 @@
 import os,yaml,shutil
+import constants
 from page import Page
 
 class Converter:
@@ -11,6 +12,8 @@ class Converter:
         self.layoutdir = config.layoutdir
         self.default = config.default_layout
         self.outdir = os.getcwd() + '/' + self.output
+        self.blogdir = config.blog
+        
         try:
             tsfile = open(config.timestamp)
             self.timestamp = pickle.load(tsfile)
@@ -24,26 +27,59 @@ class Converter:
         """
         for root, dir, files in os.walk('.'):
             if root.find('/.') == -1 and root.find('./'+self.output) == -1 and root[0] != '_':
-                current_outdir = self.outdir + root[1:] + '/'
-                try:
-                    os.mkdir(current_outdir)
-                except:
-                    pass
+                self.current_outdir = self.outdir + root[1:] + '/'
                 
                 for filename in files:
-                    filepath = root +'/'+filename.lstrip('.')
+                    filepath = root +'/'+filename
                     modify_time = os.path.getmtime(filepath)
 
-                    if modify_time  > self.timestamp and filename[-1] != '~':
-                        if filename.endswith('.markdown') or filename.endswith('.mkdwn'):
+                    if modify_time  > self.timestamp and self.convertable(filename):
+                        if root[2:] == self.blogdir:
+                            make_post(filepath)
+                        else:
+                            try:
+                                os.mkdir(self.current_outdir)
+                            except:
+                                pass
+                            self.make_page(filepath)
+                            shutil.copy(filepath, self.current_outdir+filename)
 
-                            html, html_file = self.htmlgen(filepath)
-                            html_file = open(self.outdir + '/'+ html_file, 'w')
-                            html_file.write(html)
-                            
-                            html_file.close()
-                        elif filename[1] != '_':
-                            shutil.copy(filepath, current_outdir+filename)
+    def convertable(self, filename):
+        """
+        Checks if the given filename can be converted to HTML
+        """
+        return filename[-1] != '~' and filename[0] != '.' and filename[0] != '_' and filename.endswith(constants.formats)
+
+    def make_post(self, filename):
+        pass
+
+    def make_page(self, filename):
+        page = Page(open(filename).read(), filename, self.layoutdir)
+        html = page.generate()
+        htmlpath = self.outdir + page.output_file
+
+        htmlfile = open(htmlpath, 'w')
+        htmlfile.write(html)
+        htmlfile.close()
+        
+
+    def process_files(self, root, files):
+        for filename in files:
+            filepath = root +'/'+filename
+            modify_time = os.path.getmtime(filepath)
+
+            if modify_time  > self.timestamp and filename[-1] != '~' and filename[0] != '.':
+                if filename.endswith(constants.formats):
+
+                    html, html_file = self.htmlgen(filepath)
+                    html_filepath = self.outdir + '/' + html_file
+
+                    html_file = open(html_filepath, 'w')
+                    html_file.write(html)
+
+                    html_file.close()
+                elif filename[1] != '_':
+                    shutil.copy(filepath, self.current_outdir+filename)
 
     def htmlgen(self, indoc):
         """
