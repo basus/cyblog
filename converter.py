@@ -28,7 +28,7 @@ class Converter:
         """
         for root, dir, files in os.walk('.'):
             if root.find('/.') == -1 and root.find('./'+self.output) == -1:
-                self.current_outdir = self.outdir + root[1:] + '/'
+                self.current_outdir = os.path.join(self.outdir,root.lstrip('./'))
                 try:
                     os.mkdir(self.current_outdir)
                 except:
@@ -39,12 +39,14 @@ class Converter:
                     modify_time = os.path.getmtime(filepath)
                         
                     if modify_time  > self.timestamp:
-                        if root[2:] == self.blogdir and self.convertable(filename):
-                            self.make_post(filepath)
+                        if self.blogdir in root and self.convertable(filename):
+                            blogdir = self.current_outdir.strip(self.blogdir)
+                            self.make_post(blogdir, filepath)
                         elif self.convertable(filename):
                             self.make_page(filepath)
                         elif self.copyable(filename):
-                            shutil.copy(filepath, self.current_outdir+filename)
+                            outpath = os.path.join(self.current_outdir,filename)
+                            shutil.copy(filepath, outpath)
 
     def convertable(self, filename):
         """
@@ -55,24 +57,24 @@ class Converter:
     def copyable(self, filename):
         return filename[-1] != '~' and filename[0] != '.' and filename[0] != '_'
 
-    def make_post(self, filepath):
+    def make_post(self, root, filepath):
         post = Post(filepath, self.layoutdir)
         html = post.generate()
-        htmlpath = post.output_path
+        postpath = os.path.join(root, post.prefix)
         try:
-            os.makedirs(self.outdir + '/' + post.prefix)
+            os.makedirs(postpath)
         except:
             pass
-        self.write_out(html, htmlpath)
+        htmlfile = os.path.join(postpath, post.htmlname)
+        self.write_out(html, htmlfile)
 
     def make_page(self, filepath):
         page = Page(filepath, self.layoutdir)
         html = page.generate()
-        htmlpath = page.output_path
+        htmlpath = os.path.join(self.outdir,page.output_path.lstrip('./'))
         self.write_out(html, htmlpath)
 
-    def write_out(self, html, outpath):
-        htmlpath = self.outdir + outpath.lstrip('.')
+    def write_out(self, html, htmlpath):
         htmlfile = open(htmlpath, 'w')
         htmlfile.write(html)
         htmlfile.close()

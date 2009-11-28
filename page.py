@@ -9,6 +9,7 @@ class Page:
     """
 
     def __init__(self, filename, layoutdir, def_layout='default'):
+        print filename
         self.data = open(filename).read()
         self.filename = filename
         self.layoutdir = layoutdir
@@ -53,13 +54,11 @@ class Post:
         filename = filepath.split('/')[-1]
         expandedname = filename.split('-',3)
         self.date = expandedname[:3]
+        self.prefix = '/'.join(self.date)
         self.title = '-'.join(expandedname[3:]).split('.')[0]
+        self.htmlname = self.title + '.html'
         self.page = Page(filepath, layoutdir)
-        self.make_output_path()
 
     def generate(self):
         return self.page.generate()
 
-    def make_output_path(self):
-        self.prefix = '/'.join(self.date)
-        self.output_path = './' + self.prefix + '/' + self.title + '.html'
