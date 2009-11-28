@@ -3,8 +3,9 @@ formats = ('.mdwn', '.markdown')
 configfile = '_config.yml'
 
 options = {'default_layout' : 'default',
-           'layoutdir' : '_layouts',
+           'layouts' : '_layouts',
            'output' : '_site',
            'timestamp' : '.timestamp',
-           'blog' : '_posts'
-}
+           'blog' : '_posts',
+           'source' : '.'
+           }

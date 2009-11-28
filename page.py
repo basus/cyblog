@@ -8,15 +8,18 @@ class Page:
     fills for the the hooks in the layout
     """
 
-    def __init__(self, filename, layoutdir, def_layout='default'):
-        print filename
-        self.data = open(filename).read()
-        self.filename = filename
+    def __init__(self, filepath, layoutdir, def_layout='default'):
+        self.data = open(filepath).read()
+        self.filepath = filepath
         self.layoutdir = layoutdir
         self.default_layout = def_layout
         self.extract_yaml()
         self.template = Template(self.layout.read())
-        self.output_path = os.path.splitext(filename)[0] + '.html'
+        self.make_htmlname()
+
+    def make_htmlname(self):
+        filename = os.path.split(self.filepath)[1]
+        self.htmlname = os.path.splitext(filename)[0] + '.html'
         
     def extract_yaml(self):
         """
@@ -27,7 +30,6 @@ class Page:
         self.content = '---\n'.join(splitdata[2:])
 
         self.info = yaml.load(meta)
-        self.info['filename'] = self.filename
         self.info['page'] = {}
         self.info['content'] = markdown(self.content)
 

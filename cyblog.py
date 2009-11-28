@@ -3,9 +3,11 @@ from converter import Converter
 
 def configure(configfile):
     config = yaml.load(configfile)
+    
     for option in constants.options.keys():
         if not option in config.keys():
             config[option] = constants.options[option]
+    config['ignores'] = [config['layouts'], config['output']]
     return config
 
 sys.path.append('.')
