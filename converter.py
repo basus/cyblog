@@ -4,6 +4,10 @@ from page import Page
 from page import Post
 
 class Converter:
+    """
+    A class that handles walking the filesystem and either converting to HTML
+    or copying non-convertible files to the output directory.
+    """
 
     def __init__(self, config):
         """
@@ -51,6 +55,7 @@ class Converter:
                         shutil.copy(filepath, outpath)
 
     def visitable(self, directory):
+        """Checks if the given directory should be visited """
         for each in self.ignores:
             if directory.endswith(each):
                 return False
@@ -60,13 +65,15 @@ class Converter:
             return True
         
     def convertable(self, filename):
-        " Checks if the given filename can be converted to HTML"
+        """ Checks if the given filename can be converted to HTML"""
         return filename.endswith(constants.formats) and self.copyable(filename)
 
     def copyable(self, filename):
+        """Checks if the given filename is hidden, a backup or a cyblog ignore """
         return filename[-1] != '~' and filename[0] != '.' and filename[0] != '_'
 
     def make_post(self, root, filepath):
+        """Creates the HTML version of a blog post and then writes it to disk """
         post = Post(filepath, self.layoutdir)
         html = post.generate()
         postpath = os.path.join(root, post.prefix)
@@ -78,12 +85,14 @@ class Converter:
         self.write_out(html, htmlfile)
 
     def make_page(self, filepath):
+        """Creates the HTML version of a Page and writes it to disk """
         page = Page(filepath, self.layoutdir)
         html = page.generate()
         htmlpath = os.path.join(self.outdir,page.htmlname)
         self.write_out(html, htmlpath)
 
     def write_out(self, html, htmlpath):
+        """Given a chunk of HTML and a filepath, writes the HTML to the file """
         htmlfile = open(htmlpath, 'w')
         htmlfile.write(html)
         htmlfile.close()

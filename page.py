@@ -9,6 +9,10 @@ class Page:
     """
 
     def __init__(self, filepath, layoutdir, def_layout='default'):
+        """
+        Initializes the Page object with given parameters and does setup of the
+        template and HTML name of the page
+        """
         self.data = open(filepath).read()
         self.filepath = filepath
         self.layoutdir = layoutdir
@@ -18,6 +22,7 @@ class Page:
         self.make_htmlname()
 
     def make_htmlname(self):
+        """ Creates the HTML name for the page"""
         filename = os.path.split(self.filepath)[1]
         self.htmlname = os.path.splitext(filename)[0] + '.html'
         
@@ -51,8 +56,13 @@ class Page:
 
 
 class Post:
+    """
+    Represents a blog post. Wrapper around a Page but with extraction of post
+    parameters such as permalink structure.
+    """
 
     def __init__(self, filepath,layoutdir):
+        """Creates the Page object to be wrapped and creates the Permalink """        
         filename = filepath.split('/')[-1]
         expandedname = filename.split('-',3)
         self.date = expandedname[:3]
@@ -62,5 +72,6 @@ class Post:
         self.page = Page(filepath, layoutdir)
 
     def generate(self):
+        """Wrapper around the Page's HTML generation function """
         return self.page.generate()
 
