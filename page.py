@@ -62,14 +62,19 @@ class Post:
     """
 
     def __init__(self, filepath,layoutdir):
-        """Creates the Page object to be wrapped and creates the Permalink """        
-        filename = filepath.split('/')[-1]
-        expandedname = filename.split('-',3)
+        """Creates the Page object to be wrapped and sets up the permalink """
+        self.filename = filepath.split('/')[-1]
+        self.make_permalink
+        self.page = Page(filepath, layoutdir)
+
+    def make_permalink(self):
+        """Creates the permalink for the post """
+        expandedname = self.filename.split('-',3)
         self.date = expandedname[:3]
         self.prefix = '/'.join(self.date)
-        self.title = '-'.join(expandedname[3:]).split('.')[0]
+        self.title = expandedname[3].split('.')[0]
         self.htmlname = self.title + '.html'
-        self.page = Page(filepath, layoutdir)
+        
 
     def generate(self):
         """Wrapper around the Page's HTML generation function """
