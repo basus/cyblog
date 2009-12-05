@@ -57,7 +57,7 @@ class Converter:
     def visitable(self, directory):
         """Checks if the given directory should be visited """
         for each in self.ignores:
-            if directory.endswith(each):
+            if directory.find(each+'/') != -1 or directory.endswith(each):
                 return False
         if '/.' in directory:
             return False
@@ -88,7 +88,7 @@ class Converter:
         """Creates the HTML version of a Page and writes it to disk """
         page = Page(filepath, self.layoutdir)
         html = page.generate()
-        htmlpath = os.path.join(self.outdir,page.htmlname)
+        htmlpath = os.path.join(self.current_outdir,page.htmlname)
         self.write_out(html, htmlpath)
 
     def write_out(self, html, htmlpath):
