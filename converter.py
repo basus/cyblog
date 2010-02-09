@@ -75,6 +75,7 @@ class Converter:
     def make_post(self, root, filepath):
         """Creates the HTML version of a blog post and then writes it to disk """
         post = Post(filepath, self.layoutdir)
+        post.make_permalink()
         html = post.generate()
         postpath = os.path.join(root, post.prefix)
         try:
