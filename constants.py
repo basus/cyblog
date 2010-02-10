@@ -8,4 +8,5 @@ options = {'default_layout' : 'default',
            'timestamp' : '.timestamp',
            'blog' : '_posts',
            'source' : '.'
+           'permalink' : 'pretty'
            }

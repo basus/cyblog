@@ -19,6 +19,7 @@ class Converter:
         self.blogdir = config['blog']
         self.source = os.path.abspath(os.path.expanduser(config['source']))
         self.ignores = config['ignores']
+        self.permalink = config['permalink']
         
         try:
             tsfile = open(config['timestamp'])
@@ -75,7 +76,7 @@ class Converter:
     def make_post(self, root, filepath):
         """Creates the HTML version of a blog post and then writes it to disk """
         post = Post(filepath, self.layoutdir)
-        post.make_permalink()
+        post.make_permalink(self.permalink)
         html = post.generate()
         postpath = os.path.join(root, post.prefix)
         try:
